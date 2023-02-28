@@ -8,7 +8,7 @@ APPLICATION_JSON = 'application/json'
 
 @chat.route('/')
 def index():
-    return Response(json.dumps(), mimetype=APPLICATION_JSON)
+    return Response(json.dumps("Hello, world"), mimetype=APPLICATION_JSON)
 
 
 @chat.route('/upload', methods=['POST'])

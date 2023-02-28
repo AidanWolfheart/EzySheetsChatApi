@@ -1,3 +1,3 @@
-from flask import Flask
+from application.factory import create_app
 
-app = Flask(__name__)
+app = create_app()

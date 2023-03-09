@@ -2,7 +2,10 @@
 This is a project that provides the API that allows you to chat with an AI
 
 ## Setup
-Put necessary keys in the `config.json` file
+- Put necessary contents in the `config.json` file
+- Put the necessary contents in the `client_secretes.json` file
+
+See [doc](https://docs.google.com/document/d/1isarquaUL6aNTF3gB_q_72UyjPkR91ig24gIOY16y1Q/edit) for additional info
 
 ## How start project
 Run the following command to start the flask backend

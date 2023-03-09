@@ -1,65 +1,60 @@
+import kwargs as kwargs
+
 from application.constants.constants import OPENAI_API_KEY
-from langchain.llms import OpenAIChat
-from langchain.tools import BaseTool
 from langchain.agents import ZeroShotAgent, Tool, AgentExecutor
+from langchain.chains import LLMChain
+from langchain.utilities import SerpAPIWrapper
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts.chat import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
+from langchain.schema import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage
+)
 from langchain.chains.conversation.memory import ConversationBufferMemory
-from langchain import LLMChain
 import os
+
+from application.tools.GoogleSheetsTool import GoogleSheetsBatchUpdateTool
+from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper
 
 os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 
 
-class CalculatorTool(BaseTool):
-    name = "Calculator"
-    description = "A simple calculator tool"
-
-    def _run(self, equation: str) -> str:
-        """Use the tool to solve a math equation."""
-        try:
-            result = eval(equation)
-            return str(result)
-        except Exception as e:
-            return f"Error: {str(e)}"
-
-    async def _arun(self, equation: str) -> str:
-        """Use the tool asynchronously to solve a math equation."""
-        raise NotImplementedError("CalculatorTool does not support async")
-
-
 class Agent:
     def __init__(self):
-        calculator = CalculatorTool()
+        tools = [GoogleSheetsBatchUpdateTool(api_wrapper=GoogleSheetsToolWrapper())]
 
-        a_tool = [
-            Tool(
-                name=calculator.name,
-                func=calculator.run,
-                description=calculator.description
-            )]
-
-        prefix = """Have a conversation with a human, 
-        answering the following questions as best you can. 
-        You have access to the following tools:"""
-
-        suffix = """Begin!"
-        
-        {chat_history}
-        Question: {input}
-        {agent_scratchpad}"""
+        prefix = """You are Ezy a software that helps users to deal with Google Sheets. You execute user request related to Google Sheets by writing json code and executing it with google sheets api. You have access to the following tools:"""
+        suffix = """Begin! Remember to execute user request related to Google Sheets by using google sheets api. Please use the tool if it's about Google Sheets if not respond with I don't know"""
 
         prompt = ZeroShotAgent.create_prompt(
-            a_tool,
+            tools,
             prefix=prefix,
             suffix=suffix,
-            input_variables=["input", "chat_history", "agent_scratchpad"]
+            input_variables=[]
         )
 
-        new_memory = ConversationBufferMemory(memory_key="chat_history")
+        messages = [
+            SystemMessagePromptTemplate(prompt=prompt),
+            HumanMessagePromptTemplate.from_template("{chat_history}\n\n{input}\n\nThis was your previous work "
+                                                     f"(but I haven't seen any of it! I only see what "
+                                                     "you return as final answer):\n{agent_scratchpad}")
+        ]
 
-        turbo = OpenAIChat(model_name="gpt-3.5-turbo", temperature=0)
-        llm_chain = LLMChain(llm=turbo, prompt=prompt)
-        new_agent = ZeroShotAgent(llm_chain=llm_chain, tools=a_tool, verbose=True)
-        self.agentExecutor = AgentExecutor.from_agent_and_tools(agent=new_agent,
-                                                                tools=a_tool,
-                                                                verbose=True,
-                                                                memory=new_memory)
+        memory = ConversationBufferMemory(memory_key="chat_history")
+
+        prompt = ChatPromptTemplate.from_messages(messages)
+
+        llm_chain = LLMChain(llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0), prompt=prompt)
+
+        tool_names = [tool.name for tool in tools]
+        agent = ZeroShotAgent(llm_chain=llm_chain, allowed_tools=tool_names)
+
+        self.agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True, memory=memory)
+
+        # agent_executor.run("Make a spreadsheet.")

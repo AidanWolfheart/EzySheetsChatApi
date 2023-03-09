@@ -7,4 +7,4 @@ class MessageHandler:
 
     def handle_message(self, userid, msg):
         agent = self.agent_manager.get_agent(userid)
-        return agent.agentExecutor.run(input=msg)
+        return agent.agent_executor.run(input=msg)

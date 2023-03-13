@@ -53,6 +53,9 @@ class GoogleSheetsToolWrapper(BaseModel):
 
     def create(self, request):
         try:
+            print("Calling create with the following json: ")
+            print(request)
+
             request = self.service.spreadsheets().create(body=request, fields='spreadsheetId')
             response = request.execute()
             print(f"Spreadsheet ID: {(response.get('spreadsheetId'))}")
@@ -63,11 +66,9 @@ class GoogleSheetsToolWrapper(BaseModel):
 
     def batch_update(self, spreadsheet_id, request):
         try:
-            print("Using batch_update API")
-            print("Request: ")
-            request = request.replace("```", "")
+            print("Calling batch_update with the following json: ")
             print(request)
-            request = json.loads(request)
+
             request = self.service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=request)
             response = request.execute()
         except Exception as error:
@@ -84,9 +85,12 @@ class GoogleSheetsToolWrapper(BaseModel):
             response = None
         return response
 
-    def get(self, spreadsheetId):
+    def get(self, spreadsheetId, ranges):
         try:
-            request = self.service.spreadsheets().get(spreadsheetId=spreadsheetId)
+            print("Calling get with the following json: ")
+            # print(request)
+
+            request = self.service.spreadsheets().get(spreadsheetId=spreadsheetId, ranges=ranges)
             response = request.execute()
         except HttpError as error:
             print(f"An error occurred: {error}")

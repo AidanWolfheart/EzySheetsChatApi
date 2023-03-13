@@ -13,6 +13,8 @@ from langchain.tools import BaseTool
 
 from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper
 
+sample_spreadsheet_id = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
+
 
 class GoogleSheetsBatchUpdateTool(BaseTool):
     """Tool for executing the Google Sheets Batch Update API."""
@@ -28,7 +30,7 @@ class GoogleSheetsBatchUpdateTool(BaseTool):
 
     def _run(self, action_input: str) -> str:
         """Use the tool."""
-        return self.api_wrapper.batch_update('1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE',
+        return self.api_wrapper.batch_update(sample_spreadsheet_id,
                                              sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
@@ -57,5 +59,28 @@ class GoogleSheetsCreateTool(BaseTool):
         raise NotImplementedError("Google Sheets run does not support async")
 
 
-def sanitize_json(input_json):
-    return input_json.replace("```", "")
+class GoogleSheetsGetTool(BaseTool):
+    """Tool for executing the Google Sheets Get API. Gets the values inside a spreadsheet"""
+
+    name = "Google Sheets Get API"
+    description = (
+        "A wrapper around Google Sheets. "
+        "Useful for when you need to use the Google Sheets Get API. "
+        "Input should be a list of google sheet ranges"
+    )
+
+    api_wrapper: GoogleSheetsToolWrapper
+
+    def _run(self, action_input: str) -> str:
+        """Use the tool."""
+        return self.api_wrapper.get(sample_spreadsheet_id, action_input)
+
+    async def _arun(self, input: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("Google Sheets run does not support async")
+
+
+def sanitize_json(input_json_string):
+    input_json_string = input_json_string.replace("```", "")
+    json_request = json.loads(input_json_string)
+    return json_request

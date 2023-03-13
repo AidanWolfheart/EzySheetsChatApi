@@ -28,8 +28,34 @@ class GoogleSheetsBatchUpdateTool(BaseTool):
 
     def _run(self, action_input: str) -> str:
         """Use the tool."""
-        return self.api_wrapper.batch_update('1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE', action_input)
+        return self.api_wrapper.batch_update('1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE',
+                                             sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
         """Use the tool asynchronously."""
         raise NotImplementedError("Google Sheets run does not support async")
+
+
+class GoogleSheetsCreateTool(BaseTool):
+    """Tool for executing the Google Sheets Create API. Creates a spreadsheet, returning the newly created spreadsheet"""
+
+    name = "Google Sheets Create API"
+    description = (
+        "A wrapper around Google Sheets. "
+        "Useful for when you need to use the Google Sheets Create API. "
+        "Input should be a json request."
+    )
+
+    api_wrapper: GoogleSheetsToolWrapper
+
+    def _run(self, action_input: str) -> str:
+        """Use the tool."""
+        return self.api_wrapper.create(sanitize_json(action_input))
+
+    async def _arun(self, input: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("Google Sheets run does not support async")
+
+
+def sanitize_json(input_json):
+    return input_json.replace("```", "")

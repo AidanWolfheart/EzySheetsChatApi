@@ -39,35 +39,17 @@ batch_update_value_request = {
 }
 
 dirname = os.path.dirname(__file__)
-client_secrets_filename = os.path.join(dirname, './client_secrets.json')
-token_filename = os.path.join(dirname, './token.json')
+client_secrets_filename = os.path.join(dirname, '../agent/client_secrets.json')
+token_filename = os.path.join(dirname, '../agent/token.json')
 
 
 class GoogleSheetsToolWrapper(BaseModel):
     """Tool for executing Google Sheets API Methods."""
 
-    name = "Google Sheets"
-    description = "Useful for executing Google Sheets API Methods"
-    creds: Any
     service: Any
 
-    def __init__(self):
-        super().__init__()
-        self.get_service()
-
-    def get_service(self):
-        if os.path.exists('token.json'):
-            self.creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        if not self.creds or not self.creds.valid:
-            if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    client_secrets_filename, SCOPES)
-                self.creds = flow.run_local_server(port=0)
-            with open(token_filename, 'w') as token:
-                token.write(self.creds.to_json())
-        self.service = build('sheets', 'v4', credentials=self.creds)
+    name = "Google Sheets"
+    description = "Useful for executing Google Sheets API Methods"
 
     def create(self, request):
         try:
@@ -79,23 +61,23 @@ class GoogleSheetsToolWrapper(BaseModel):
             response = None
         return response
 
-    def batch_update(self, spreadsheetId, request):
+    def batch_update(self, spreadsheet_id, request):
         try:
             print("Using batch_update API")
             print("Request: ")
             request = request.replace("```", "")
             print(request)
             request = json.loads(request)
-            request = self.service.spreadsheets().batchUpdate(spreadsheetId=spreadsheetId, body=request)
+            request = self.service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=request)
             response = request.execute()
         except Exception as error:
             print(f"An error occurred: {traceback.print_exc()}")
             response = None
         return response
 
-    def batch_update_values(self, spreadsheetId, request):
+    def batch_update_values(self, spreadsheet_id, request):
         try:
-            request = self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheetId, body=request)
+            request = self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body=request)
             response = request.execute()
         except HttpError as error:
             print(f"An error occurred: {error}")
@@ -125,7 +107,7 @@ class GoogleSheetsToolWrapper(BaseModel):
         action = {
             'sheet': self.get_service(),
             'create': self.create(spreadsheetId=spreadsheetId, request=request),
-            'update': self.batch_update(spreadsheetId=spreadsheetId, request=request),
+            'update': self.batch_update(spreadsheet_id=spreadsheetId, request=request),
             'get': self.get(spreadsheetId=spreadsheetId, request=request),
             'clear': self.batch_clear_by_data_filter(spreadsheetId=spreadsheetId, request=request)
         }
@@ -195,9 +177,25 @@ test_json = '''
 ```
 '''
 
+create_reqeust = '''{
+  "properties": {
+    "title": "My Spreadsheet"
+  },
+  "sheets": [
+    {
+      "properties": {
+        "title": "Sheet1"
+      }
+    }
+  ]
+}
+'''
+
 if __name__ == "__main__":
-    sheets = GoogleSheetsToolWrapper()
+    service = get_service()
+    sheets = GoogleSheetsToolWrapper(service)
     # sheets.create(create_request)
     # sheets.batch_update_values('1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE', batch_update_value_request)
     your_sheetid = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
-    sheets.batch_update(your_sheetid, test_json)
+    # sheets.batch_update(your_sheetid, test_json)
+    sheets.create(test_json)

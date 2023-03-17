@@ -4,6 +4,10 @@ import os.path
 import traceback
 from typing import Any
 
+import flask
+import google
+import google_auth_oauthlib
+import httplib2
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -11,8 +15,9 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import json
 from pydantic import BaseModel
+from oauth2client import client
 
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+from application.shared.helpers import credentials_to_dict
 
 create_request = {
     'properties': {
@@ -21,7 +26,6 @@ create_request = {
 }
 
 SHEET_ID = 0
-
 
 batch_update_value_request = {
     "valueInputOption": "RAW",
@@ -38,11 +42,6 @@ batch_update_value_request = {
     ]
 }
 
-dirname = os.path.dirname(__file__)
-client_secrets_filename = os.path.join(dirname, './client_secrets.json')
-token_filename = os.path.join(dirname, './token.json')
-
-
 class GoogleSheetsToolWrapper(BaseModel):
     """Tool for executing Google Sheets API Methods."""
 
@@ -56,18 +55,31 @@ class GoogleSheetsToolWrapper(BaseModel):
         self.get_service()
 
     def get_service(self):
-        if os.path.exists('token.json'):
-            self.creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        if not self.creds or not self.creds.valid:
-            if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    client_secrets_filename, SCOPES)
-                self.creds = flow.run_local_server(port=0)
-            with open(token_filename, 'w') as token:
-                token.write(self.creds.to_json())
+        # if os.path.exists('token.json'):
+        #     self.creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+        # if not self.creds or not self.creds.valid:
+        #     if self.creds and self.creds.expired and self.creds.refresh_token:
+        #         self.creds.refresh(Request())
+        #     else:
+        #         flow = InstalledAppFlow.from_client_secrets_file(
+        #             client_secrets_filename, SCOPES)
+        #         self.creds = flow.run_local_server(port=0)
+        #     with open(token_filename, 'w') as token:
+        #         token.write(self.creds.to_json())
+
+        # Exchange auth code for access token, refresh token, and ID token
+        # credentials = client.credentials_from_clientsecrets_and_code(
+        #     client_secrets_filename, SCOPES,
+        #     self.auth_token)
+        #
+        # http_auth = credentials.authorize(httplib2.Http())
+
+        # Load credentials from the session.
+        self.creds = google.oauth2.credentials.Credentials(
+            **flask.session['credentials'])
+
         self.service = build('sheets', 'v4', credentials=self.creds)
+        flask.session['credentials'] = credentials_to_dict(self.creds)
 
     def create(self, request):
         try:

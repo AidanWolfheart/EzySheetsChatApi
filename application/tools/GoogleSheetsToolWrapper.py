@@ -87,8 +87,8 @@ class GoogleSheetsToolWrapper(BaseModel):
 
     def get(self, spreadsheetId, ranges):
         try:
-            print("Calling get with the following json: ")
-            # print(request)
+            print("Calling get with the following range: ")
+            print(ranges)
 
             request = self.service.spreadsheets().get(spreadsheetId=spreadsheetId, ranges=ranges)
             response = request.execute()

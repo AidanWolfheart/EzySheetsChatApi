@@ -78,6 +78,37 @@ create_reqeust = {
   }
 }
 
+test_reqeust_2 = {
+  "requests": [
+    {
+      "repeatCell": {
+        "range": {
+          "startRowIndex": 0,
+          "endRowIndex": 1
+        },
+        "cell": {
+          "userEnteredFormat": {
+            "backgroundColor": {
+              "red": 1,
+              "green": 1,
+              "blue": 0
+            }
+          }
+        },
+        "fields": "userEnteredFormat.backgroundColor",
+        "condition": {
+          "type": "NUMBER_GREATER",
+          "values": [
+            {
+              "userEnteredValue": "3"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
+
 
 if __name__ == "__main__":
     # run from root dir and run `python3 -m application.local_test`
@@ -88,6 +119,6 @@ if __name__ == "__main__":
     your_sheetid = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
 
     # Test
-    # sheets.batch_update(your_sheetid, batch_update_test_reqeust)
-    sheets.create(create_reqeust)
+    sheets.batch_update_values(your_sheetid, test_reqeust_2)
+    # sheets.create(create_reqeust)
 

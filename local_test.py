@@ -1,5 +1,5 @@
 from application.agent.load_tools import get_service
-from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper
+from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, GoogleSheetsToolWrapper1
 
 batch_update_test_reqeust = {
   "requests": [
@@ -111,14 +111,28 @@ test_reqeust_2 = {
 
 
 if __name__ == "__main__":
-    # run from root dir and run `python3 -m application.local_test`
+    # # run from root dir and run `python3 -m application.local_test`
     service = get_service()
-    sheets = GoogleSheetsToolWrapper(service=service)
-    # sheets.create(create_request)
-    # sheets.batch_update_values('1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE', batch_update_value_request)
-    your_sheetid = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
+    # sheets = GoogleSheetsToolWrapper(service=service)
+    # # sheets.create(create_request)
+    # # sheets.batch_update_values('1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE', batch_update_value_request)
+    # your_sheetid = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
+    #
+    # # Test
+    # sheets.batch_update_values(your_sheetid, test_reqeust_2)
+    # # sheets.create(create_reqeust)
 
-    # Test
-    sheets.batch_update_values(your_sheetid, test_reqeust_2)
-    # sheets.create(create_reqeust)
-
+    request = '''function highlightFirstRow() {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var range = sheet.getDataRange();
+  var values = range.getValues();
+  for (var i = 0; i < values[0].length; i++) {
+    if (values[0][i] > 3) {
+      sheet.getRange(1, i+1).setBackground("yellow");
+    }
+  }
+}
+'''
+    scriptId = "1Ca_cZBxopuL9irK-Y0iCdnO9fUPxJMcm14qmLiVxUK4RRdmvC0Ug1lhE"
+    script_tool = GoogleSheetsToolWrapper1(service=service)
+    script_tool.update_script(scriptId, request)

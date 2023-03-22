@@ -6,14 +6,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 from application.tools.GoogleSheetsTool import GoogleSheetsBatchUpdateTool, GoogleSheetsCreateTool, GoogleSheetsGetTool, \
-    GoogleSheetsValuesBatchUpdateTool
-from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper
+    GoogleSheetsValuesBatchUpdateTool, GoogleSheetsUpdateTool
+from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, GoogleSheetsToolWrapper1
 
 dirname = os.path.dirname(__file__)
 client_secrets_filename = os.path.join(dirname, './client_secrets.json')
 token_filename = os.path.join(dirname, './token.json')
 
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+SCOPES = ['https://www.googleapis.com/auth/script.projects']
 
 
 def get_service():
@@ -29,15 +29,15 @@ def get_service():
             creds = flow.run_local_server(port=0)
         with open(token_filename, 'w') as token:
             token.write(creds.to_json())
-    return build('sheets', 'v4', credentials=creds)
+    return build('script', 'v1', credentials=creds)
 
 
 def load_tools():
     tools = []
 
     service = get_service()
-    tools.append(GoogleSheetsBatchUpdateTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
-    tools.append(GoogleSheetsCreateTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
-    tools.append(GoogleSheetsGetTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
-    tools.append(GoogleSheetsValuesBatchUpdateTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
+    tools.append(GoogleSheetsUpdateTool(api_wrapper=GoogleSheetsToolWrapper1(service=service)))
+    # tools.append(GoogleSheetsCreateTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
+    # tools.append(GoogleSheetsGetTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
+    # tools.append(GoogleSheetsValuesBatchUpdateTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
     return tools

@@ -13,6 +13,11 @@ Run the following command to start the flask backend
 flask run
 ```
 
+## Local Testing
+Run the following command to test the agent locally by entering the message thru the command prompt.
+`python -m local_agent_chat`
+
+
 ## Manually Testing the API
 ```
 # Run the following command back to back. Should give end result of: 105

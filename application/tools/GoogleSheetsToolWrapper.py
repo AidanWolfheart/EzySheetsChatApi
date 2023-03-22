@@ -11,6 +11,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import json
 from pydantic import BaseModel
+from googleapiclient import errors
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -42,6 +43,65 @@ dirname = os.path.dirname(__file__)
 client_secrets_filename = os.path.join(dirname, '../agent/client_secrets.json')
 token_filename = os.path.join(dirname, '../agent/token.json')
 
+
+class GoogleSheetsToolWrapper1(BaseModel):
+    """Tool Wrapper for executing App Script Code"""
+
+    service: Any
+
+    name = "Google Sheets App Script"
+    description = "Useful for executing Google Sheets App Script Methods."
+
+    def create_script(self, request):
+
+        body = {'title': request.strip()}
+
+        try:
+            response = self.service.projects().create(body=body).execute()
+        except errors.HttpError as error:
+            print(error.content)
+            response = None
+        return response
+
+    def update_script(self, scriptId, request):
+        print(f"---- request: {request}\n")
+        body = {
+            'files': [{
+                'name': 'tool1',
+                'type': 'SERVER_JS',
+                'source': request.strip()
+            }, {
+                'name': 'appsscript',
+                'type': 'JSON',
+                'source': '''
+                            {
+                            "timeZone": "Asia/Almaty",
+                            "exceptionLogging": "CLOUD"
+                            }
+                            '''.strip()
+            }]
+        }
+        print("Updating script...")
+        print(f"=========== \n scriptId: {scriptId} \n body: {body} \n ===========")
+        try:
+            response = self.service.projects().updateContent(
+                body=body,
+                scriptId=scriptId
+            ).execute()
+            result = "Update was successful!"
+            print(result)
+        except errors.HttpError as error:
+            print("Encountered erroring while executing update: " + error.content)
+            result = "Update was unsuccessful"
+        return result
+
+    def run_script(self, scriptId, request):
+        try:
+            response = self.service.scripts().run(scriptId=scriptId, body=request).execute()
+        except errors.HttpError as error:
+            print(error.content)
+            response = None
+        return response
 
 class GoogleSheetsToolWrapper(BaseModel):
     """Tool for executing Google Sheets API Methods."""

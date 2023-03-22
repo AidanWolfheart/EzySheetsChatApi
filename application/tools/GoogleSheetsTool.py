@@ -11,9 +11,82 @@ from googleapiclient.errors import HttpError
 import json
 from langchain.tools import BaseTool
 
-from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper
+from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, GoogleSheetsToolWrapper1
 
 sample_spreadsheet_id = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
+
+scriptId = "1Ca_cZBxopuL9irK-Y0iCdnO9fUPxJMcm14qmLiVxUK4RRdmvC0Ug1lhE"
+
+class GoogleSheetsScriptBaseTool(BaseTool):
+    def sanitize_json(self, input_json_string):
+        input_json_string = input_json_string.replace("```", "")
+        return input_json_string
+
+class GoogleSheetsCreateScriptTool(GoogleSheetsScriptBaseTool):
+    """Tool for executing the Google Sheets App Script Create method. Creates a new script"""
+
+    name = "Google Sheets App Script Create method."
+    description = (
+        "A wrapper around Google Sheets App Script."
+        "Useful for when you need to create a new App Script script"
+        "Input should be a Script Name"
+    )
+
+    api_wrapper: GoogleSheetsToolWrapper1
+
+    def _run(self, action_input: str) -> str:
+        "Use the tool."
+        return self.api_wrapper.create_script(self.sanitize_json(action_input))
+
+    async def _arun(self, input: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("Google Sheets run does not support async")
+
+
+class GoogleSheetsUpdateTool(GoogleSheetsScriptBaseTool):
+    """Tool for updating the Google Sheets App Script script."""
+
+    name = "Google Sheets App Script Update method."
+    description = (
+        "A wrapper around Google Sheets App Script."
+        "Useful for when you need to Update the Google Sheets App Script script."
+        "Input should be a function for App Script"
+    )
+
+    api_wrapper: GoogleSheetsToolWrapper1
+
+    def _run(self, action_input: str) -> str:
+        "Use the tool"
+        print(f"Google Sheet tool, action input: {action_input}\n")
+        return self.api_wrapper.update_script(scriptId, self.sanitize_json(action_input))
+
+    async def _arun(self, input: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("Google Sheets run does not support async")
+
+
+class GoogleSheetsRunScriptTool(BaseTool):
+    """Tool for running Google Sheets App Script script."""
+
+    name = "Google Sheets App Script Run method"
+    description = (
+        "A wrapper around Google Sheets App Script."
+        "Useful for when you need to Run the Google Sheets App Script script."
+        "Input should be a function name"
+
+    )
+
+    api_wrapper: GoogleSheetsToolWrapper1
+
+    def _run(self, action_input: str) -> str:
+        "Use the tool"
+        return self.api_wrapper.run_script(scriptId, action_input)
+
+    async def _arun(self, input: str) -> str:
+        """Use the tool asynchronously."""
+        raise NotImplementedError("Google Sheets run does not support async")
+
+# =================== ===================
 
 class GoogleSheetsBaseTool(BaseTool):
     def sanitize_json(self, input_json_string):

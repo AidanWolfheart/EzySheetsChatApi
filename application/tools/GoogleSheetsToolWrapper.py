@@ -55,25 +55,6 @@ class GoogleSheetsToolWrapper(BaseModel):
         self.get_service()
 
     def get_service(self):
-        # if os.path.exists('token.json'):
-        #     self.creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        # if not self.creds or not self.creds.valid:
-        #     if self.creds and self.creds.expired and self.creds.refresh_token:
-        #         self.creds.refresh(Request())
-        #     else:
-        #         flow = InstalledAppFlow.from_client_secrets_file(
-        #             client_secrets_filename, SCOPES)
-        #         self.creds = flow.run_local_server(port=0)
-        #     with open(token_filename, 'w') as token:
-        #         token.write(self.creds.to_json())
-
-        # Exchange auth code for access token, refresh token, and ID token
-        # credentials = client.credentials_from_clientsecrets_and_code(
-        #     client_secrets_filename, SCOPES,
-        #     self.auth_token)
-        #
-        # http_auth = credentials.authorize(httplib2.Http())
-
         # Load credentials from the session.
         self.creds = google.oauth2.credentials.Credentials(
             **flask.session['credentials'])

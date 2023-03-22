@@ -1,12 +1,11 @@
 import flask
 import google
 import google_auth_oauthlib
-from flask_cors import cross_origin
 from google.auth.transport import requests
 
 from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES
 from application.handlers.message_handler import MessageHandler
-from flask import Blueprint, Response, request
+from flask import Blueprint, Response, request, make_response, jsonify
 import json
 import traceback
 
@@ -29,11 +28,9 @@ def send_auth():
     google_auth = request.get_json()
     return Response(json.dumps(google_auth), mimetype=APPLICATION_JSON)
 
-@cross_origin()
+
 @chat.route('/conversation', methods=['POST'])
 def conversation():
-    if request.method == 'OPTIONS':
-        return Response(200)
     try:
         if 'credentials' not in flask.session:
             return flask.redirect('authorize')
@@ -48,11 +45,10 @@ def conversation():
     except Exception:
         error = f'Encountered error: {traceback.format_exc()})'
         print(error)
-        return Response(json.dumps(error), mimetype=APPLICATION_JSON)
+        return Response(json.dumps("Error has occured. Please try again."), mimetype=APPLICATION_JSON)
 
 
-@cross_origin()
-@chat.route('/authorize')
+@chat.route('/authorize', methods=['GET'])
 def authorize():
     # Create flow instance to manage the OAuth 2.0 Authorization Grant Flow steps.
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -64,6 +60,9 @@ def authorize():
     # error.
     flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True)
 
+    if 'state' in flask.session:
+        return jsonify({"url": "http://localhost:4200/"})
+
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
         # re-prompting the user for permission. Recommended for web server apps.
@@ -74,22 +73,28 @@ def authorize():
     # Store the state so the callback can verify the auth server response.
     flask.session['state'] = state
 
-    # Annoying issue with redirect here:
-    # flask.redirect returns CORS error from frontend
-    # if response is json with url, can use that url to redirect, but STATE will be lost
-
     flask.session.modified = True
 
-    return flask.redirect(authorization_url), 302
-    # return Response(json.dumps({'url':authorization_url}), mimetype=APPLICATION_JSON)
+    return jsonify({"url": authorization_url})
 
 
-@cross_origin()
-@chat.route('/oauth2callback')
+@chat.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:4200')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+
+@chat.route('/oauth2callback', methods=['GET'])
 def oauth2callback():
+    if request.method == "OPTIONS":  # CORS preflight
+        return 200
+
     # Specify the state when creating the flow in the callback so that it can
     # verified in the authorization server response.
-    state = flask.session['state']
+    state = request.args.get('state')
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
@@ -108,27 +113,20 @@ def oauth2callback():
     flask.session.modified = True
 
     response = flask.redirect("http://localhost:4200/")
-    response.headers.add('Access-Control-Allow-Headers',
-                         "Origin, X-Requested-With, Content-Type, Accept, x-auth")
-
     return response
-    # return flask.redirect(flask.url_for('test_api_request'))
 
-@cross_origin()
-@chat.route('/signed-in')
+
+@chat.route('/signed-in', methods=['GET'])
 def signed_in():
     credentials_exist = False
 
     if 'credentials' in flask.session:
         credentials_exist = True
 
-    response = Response(json.dumps(credentials_exist), mimetype=APPLICATION_JSON)
-    response.headers.add('Access-Control-Allow-Headers',
-                        "Origin, X-Requested-With, Content-Type, Accept, x-auth")
-    return response
+    return jsonify({"creds": credentials_exist})
 
 
-@chat.route('/revoke')
+@chat.route('/revoke', methods=['GET'])
 def revoke():
     if 'credentials' not in flask.session:
         return ('You need to <a href="/authorize">authorize</a> before ' +

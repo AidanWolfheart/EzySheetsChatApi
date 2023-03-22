@@ -20,3 +20,7 @@ curl -X POST http://127.0.0.1:5000/chat/conversation -H 'Content-Type: applicati
 curl -X POST http://127.0.0.1:5000/chat/conversation -H 'Content-Type: application/json' -d '{"userid":"1","message":"and plus 5"}'
 curl -X POST http://127.0.0.1:5000/chat/conversation -H 'Content-Type: application/json' -d '{"userid":"1","message":"Write 1 to 5 to cell A1 to A5 in my google sheet with sheetid=0"}'
 ```
+
+## Session
+Project utilises Redis for persistent storage of user sessions, see [doc](https://redis.io/docs/getting-started/). Redis 
+along with Redis-cli have to be installed in order for persistence to work.

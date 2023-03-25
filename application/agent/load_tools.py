@@ -6,20 +6,20 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 from application.tools.GoogleSheetsTool import GoogleSheetsBatchUpdateTool, GoogleSheetsCreateTool, GoogleSheetsGetTool, \
-    GoogleSheetsValuesBatchUpdateTool, GoogleSheetsUpdateTool
-from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, GoogleSheetsToolWrapper1
+    GoogleSheetsValuesBatchUpdateTool, AppScriptUpdateTool, AppScriptRunScriptTool
+from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, AppScriptToolWrapper
 
 dirname = os.path.dirname(__file__)
-client_secrets_filename = os.path.join(dirname, './client_secrets.json')
-token_filename = os.path.join(dirname, './token.json')
+client_secrets_filename = os.path.join(dirname, '../../.env/client_secrets.json')
+token_filename = os.path.join(dirname, '../../.env/token.json')
 
 SCOPES = ['https://www.googleapis.com/auth/script.projects']
 
 
 def get_service():
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists('../../.env/token.json'):
+        creds = Credentials.from_authorized_user_file('../../.env/token.json', SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -36,7 +36,8 @@ def load_tools():
     tools = []
 
     service = get_service()
-    tools.append(GoogleSheetsUpdateTool(api_wrapper=GoogleSheetsToolWrapper1(service=service)))
+    tools.append(AppScriptUpdateTool(api_wrapper=AppScriptToolWrapper(service=service)))
+    tools.append(AppScriptRunScriptTool(api_wrapper=AppScriptToolWrapper(service=service)))
     # tools.append(GoogleSheetsCreateTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
     # tools.append(GoogleSheetsGetTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))
     # tools.append(GoogleSheetsValuesBatchUpdateTool(api_wrapper=GoogleSheetsToolWrapper(service=service)))

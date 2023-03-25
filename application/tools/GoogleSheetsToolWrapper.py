@@ -41,10 +41,10 @@ batch_update_value_request = {
 
 dirname = os.path.dirname(__file__)
 client_secrets_filename = os.path.join(dirname, '../agent/client_secrets.json')
-token_filename = os.path.join(dirname, '../agent/token.json')
+token_filename = os.path.join(dirname, '../../.env/token.json')
 
 
-class GoogleSheetsToolWrapper1(BaseModel):
+class AppScriptToolWrapper(BaseModel):
     """Tool Wrapper for executing App Script Code"""
 
     service: Any

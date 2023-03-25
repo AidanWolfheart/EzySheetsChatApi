@@ -2,7 +2,7 @@ import json
 import os
 
 dirname = os.path.dirname(__file__)
-filename = os.path.join(dirname, '../../config.json')
+filename = os.path.join(dirname, '../../.env/config.json')
 
 f = open(filename)
 data = json.load(f)

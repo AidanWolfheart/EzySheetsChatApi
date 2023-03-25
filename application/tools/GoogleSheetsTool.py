@@ -11,18 +11,18 @@ from googleapiclient.errors import HttpError
 import json
 from langchain.tools import BaseTool
 
-from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, GoogleSheetsToolWrapper1
+from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, AppScriptToolWrapper
 
 sample_spreadsheet_id = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
 
-scriptId = "1Ca_cZBxopuL9irK-Y0iCdnO9fUPxJMcm14qmLiVxUK4RRdmvC0Ug1lhE"
+scriptId = "1rYaaiM5Ge1r_gMTIQ4i_p7t1Txln_Gq5_earazkbDNVH-JSBVl1RZLEF"
 
 class GoogleSheetsScriptBaseTool(BaseTool):
     def sanitize_json(self, input_json_string):
         input_json_string = input_json_string.replace("```", "")
         return input_json_string
 
-class GoogleSheetsCreateScriptTool(GoogleSheetsScriptBaseTool):
+class AppScriptCreateScriptTool(GoogleSheetsScriptBaseTool):
     """Tool for executing the Google Sheets App Script Create method. Creates a new script"""
 
     name = "Google Sheets App Script Create method."
@@ -32,7 +32,7 @@ class GoogleSheetsCreateScriptTool(GoogleSheetsScriptBaseTool):
         "Input should be a Script Name"
     )
 
-    api_wrapper: GoogleSheetsToolWrapper1
+    api_wrapper: AppScriptToolWrapper
 
     def _run(self, action_input: str) -> str:
         "Use the tool."
@@ -43,7 +43,7 @@ class GoogleSheetsCreateScriptTool(GoogleSheetsScriptBaseTool):
         raise NotImplementedError("Google Sheets run does not support async")
 
 
-class GoogleSheetsUpdateTool(GoogleSheetsScriptBaseTool):
+class AppScriptUpdateTool(GoogleSheetsScriptBaseTool):
     """Tool for updating the Google Sheets App Script script."""
 
     name = "Google Sheets App Script Update method."
@@ -53,7 +53,7 @@ class GoogleSheetsUpdateTool(GoogleSheetsScriptBaseTool):
         "Input should be a function for App Script"
     )
 
-    api_wrapper: GoogleSheetsToolWrapper1
+    api_wrapper: AppScriptToolWrapper
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
@@ -65,8 +65,8 @@ class GoogleSheetsUpdateTool(GoogleSheetsScriptBaseTool):
         raise NotImplementedError("Google Sheets run does not support async")
 
 
-class GoogleSheetsRunScriptTool(BaseTool):
-    """Tool for running Google Sheets App Script script."""
+class AppScriptRunScriptTool(BaseTool):
+    """Tool for running Google Sheets App Script Run method."""
 
     name = "Google Sheets App Script Run method"
     description = (
@@ -76,7 +76,7 @@ class GoogleSheetsRunScriptTool(BaseTool):
 
     )
 
-    api_wrapper: GoogleSheetsToolWrapper1
+    api_wrapper: AppScriptToolWrapper
 
     def _run(self, action_input: str) -> str:
         "Use the tool"

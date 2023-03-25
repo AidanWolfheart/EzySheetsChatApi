@@ -26,7 +26,46 @@ from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper
 
 os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 
+class MyAppScriptZeroShotAgent:
+    def __init__(self):
+        tools = load_tools()
 
+        # prefix = """You are Ezy a software that helps users to deal with Google Sheets.
+        # You execute user request related to Google Sheets by writing json code and executing it with google sheets api.
+        # Assume you have already been authenticated and authorized.
+        # Use google sheets formulas to complete the user requests where possible.
+        # You have access to the following tools:""".replace('\n', '').replace('  ', '')
+
+        prefix = """You are Ezy a Google Sheets assistant. Given the user's request, it is your job to make a function for App Script that would be executable in Google Sheets App Script environment. Remember only to output a function for App Script for Google Sheets and no text. 
+
+    TOOLS:
+    ------
+
+    Assistant has access to the following tools:"""
+
+        suffix = """Begin, remember to use the provided tool when possible!
+
+
+    New input: {input}
+    {agent_scratchpad}"""
+
+        prompt = ZeroShotAgent.create_prompt(
+            tools,
+            prefix=prefix,
+            suffix=suffix,
+            input_variables=["input", "agent_scratchpad"]
+        )
+
+        llm_chain = LLMChain(llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0), prompt=prompt, verbose=True)
+
+        tool_names = [tool.name for tool in tools]
+
+        agent = ZeroShotAgent(llm_chain=llm_chain, allowed_tools=tool_names)
+
+        self.agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
+
+# This agent calls the App Script API
+# eg. https://developers.google.com/apps-script/reference/spreadsheet
 class Agent:
     def __init__(self):
         tools = load_tools()
@@ -57,52 +96,16 @@ class Agent:
             input_variables=["input", "agent_scratchpad"]
         )
 
-        # memory = ConversationBufferMemory(memory_key='chat_history')
-
-        # system_template = SystemMessagePromptTemplate(prompt=prompt)
-        # human_template = HumanMessagePromptTemplate.from_template("{input}\n\nThis was your previous work "
-        #         f"(but I haven't seen any of it! I only see what "
-        #         "you return as final answer):\n{agent_scratchpad}")
-        # ai_template = AIMessagePromptTemplate.from_template("""
-        # [
-        #  "properties": [
-        #  "title": "My New Spreadsheet"
-        #      ]
-        # ]""")
-
-        # human_request = HumanMessagePromptTemplate.from_template("{input}\n\nReply in json code" +
-        #                                                           " and use the provided tools:\n{agent_scratchpad}")
-
-        # messages = [
-        #     SystemMessagePromptTemplate(prompt=prompt),
-        #     # HumanMessagePromptTemplate.from_template("Make a simple spreadsheet"),
-        #     # AIMessagePromptTemplate.from_template("json for Google Sheets API"),
-        #     # HumanMessagePromptTemplate.from_template("{input}\n\nThis was your previous work "
-        #     #                                          f"(but I haven't seen any of it! I only see what "
-        #     #                                          "you return as final answer):\n{agent_scratchpad}"),
-        # ]
-
-        # messages = [
-        #     system_template,
-        #     human_template
-        # ]
-
-        # prompt = ChatPromptTemplate.from_messages(messages)
-
         llm_chain = LLMChain(llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0), prompt=prompt, verbose=True)
 
         tool_names = [tool.name for tool in tools]
 
         agent = ConversationalAgent(llm_chain=llm_chain, allowed_tools=tool_names)
 
-        # new chat agent, but not quite working
-        # agent = ChatAgent(llm_chain=llm_chain, allowed_tools=tool_names)
-
         self.agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
 
-        # agent_executor.run("Make a spreadsheet.")
-
-
+# This Agent uses Google Sheets API with json as the body of the requests.
+# eg. https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/batchUpdate
 class Agent1:
     def __init__(self):
         tools = [GoogleSheetsBatchUpdateTool(api_wrapper=GoogleSheetsToolWrapper())]

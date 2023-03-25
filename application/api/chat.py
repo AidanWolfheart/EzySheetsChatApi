@@ -60,7 +60,7 @@ def authorize():
     # error.
     flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True)
 
-    if 'state' in flask.session:
+    if 'state' in flask.session and 'credentials' in flask.session:
         return jsonify({"url": "http://localhost:4200/"})
 
     authorization_url, state = flow.authorization_url(

@@ -1,4 +1,4 @@
-from application.agent.load_tools import get_service
+from application.agent.load_tools import get_appscript_service
 from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, AppScriptToolWrapper
 
 batch_update_test_reqeust = {
@@ -110,7 +110,7 @@ test_reqeust_2 = {
 
 
 def init():
-    service = get_service()
+    service = get_appscript_service()
     return AppScriptToolWrapper(service=service)
 
 

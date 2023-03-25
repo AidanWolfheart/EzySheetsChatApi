@@ -9,7 +9,7 @@ data = json.load(f)
 
 OPENAI_API_KEY = data['OPENAI_API_KEY']
 
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/script.projects']
 
 CLIENT_SECRETS_FILE = os.path.join(dirname, './client_secrets.json')
 

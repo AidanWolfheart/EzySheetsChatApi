@@ -94,8 +94,8 @@ class AppScriptToolWrapper(BaseModel):
                 body=body,
                 scriptId=scriptId
             ).execute()
-            result = "Update was successful!"
-            print(result)
+            print(response)
+            result = "Update was successful"
         except errors.HttpError as error:
             print("Encountered erroring while executing update: " + error.content)
             result = "Update was unsuccessful"
@@ -116,20 +116,6 @@ class GoogleSheetsToolWrapper(BaseModel):
 
     name = "Google Sheets"
     description = "Useful for executing Google Sheets API Methods"
-    creds: Any
-    service: Any
-
-    def __init__(self):
-        super().__init__()
-        self.get_service()
-
-    def get_service(self):
-        # Load credentials from the session.
-        self.creds = google.oauth2.credentials.Credentials(
-            **flask.session['credentials'])
-
-        self.service = build('sheets', 'v4', credentials=self.creds)
-        flask.session['credentials'] = credentials_to_dict(self.creds)
 
     def create(self, request):
         try:

@@ -4,6 +4,10 @@ import os.path
 import traceback
 from typing import Any
 
+import flask
+import google
+import google_auth_oauthlib
+import httplib2
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -12,6 +16,9 @@ from googleapiclient.errors import HttpError
 import json
 from pydantic import BaseModel
 from googleapiclient import errors
+from oauth2client import client
+from application.shared.helpers import credentials_to_dict
+
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -22,7 +29,6 @@ create_request = {
 }
 
 SHEET_ID = 0
-
 
 batch_update_value_request = {
     "valueInputOption": "RAW",
@@ -110,6 +116,20 @@ class GoogleSheetsToolWrapper(BaseModel):
 
     name = "Google Sheets"
     description = "Useful for executing Google Sheets API Methods"
+    creds: Any
+    service: Any
+
+    def __init__(self):
+        super().__init__()
+        self.get_service()
+
+    def get_service(self):
+        # Load credentials from the session.
+        self.creds = google.oauth2.credentials.Credentials(
+            **flask.session['credentials'])
+
+        self.service = build('sheets', 'v4', credentials=self.creds)
+        flask.session['credentials'] = credentials_to_dict(self.creds)
 
     def create(self, request):
         try:

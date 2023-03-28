@@ -16,7 +16,13 @@ dirname = os.path.dirname(__file__)
 client_secrets_filename = os.path.join(dirname, '../../.env/client_secrets.json')
 token_filename = os.path.join(dirname, '../../.env/token.json')
 
-SCOPES = ['https://www.googleapis.com/auth/script.projects']
+SCOPES = ['https://www.googleapis.com/auth/drive.scripts',
+          'https://www.googleapis.com/auth/spreadsheets',
+          'https://www.googleapis.com/auth/script.projects',
+          'https://www.googleapis.com/auth/script.processes',
+          'https://www.googleapis.com/auth/drive',
+          'https://www.googleapis.com/auth/script.scriptapp',
+          'https://www.googleapis.com/auth/script.external_request']
 
 def get_local_cred():
     creds = None

@@ -15,12 +15,13 @@ from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, A
 
 sample_spreadsheet_id = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
 
-scriptId = "1rYaaiM5Ge1r_gMTIQ4i_p7t1Txln_Gq5_earazkbDNVH-JSBVl1RZLEF"
+scriptId = "1n3TQX2a-CgpcXnRnR07eBknXw2vKmJGLqTqbyWvZO0u-v3sVsRY71WV4"
 
 class GoogleSheetsScriptBaseTool(BaseTool):
     def sanitize_json(self, input_json_string):
         input_json_string = input_json_string.replace("```", "")
         return input_json_string
+
 
 class AppScriptCreateScriptTool(GoogleSheetsScriptBaseTool):
     """Tool for executing the Google Sheets App Script Create method. Creates a new script"""
@@ -36,7 +37,7 @@ class AppScriptCreateScriptTool(GoogleSheetsScriptBaseTool):
 
     def _run(self, action_input: str) -> str:
         "Use the tool."
-        return self.api_wrapper.create_script(self.sanitize_json(action_input))
+        return self.api_wrapper.create_script(sample_spreadsheet_id, self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
         """Use the tool asynchronously."""
@@ -57,7 +58,7 @@ class AppScriptUpdateTool(GoogleSheetsScriptBaseTool):
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
-        print(f"Google Sheet tool, action input: {action_input}\n")
+        # print(f"Google Sheet tool, action input: {action_input}\n")
         return self.api_wrapper.update_script(scriptId, self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
@@ -65,7 +66,7 @@ class AppScriptUpdateTool(GoogleSheetsScriptBaseTool):
         raise NotImplementedError("Google Sheets run does not support async")
 
 
-class AppScriptRunScriptTool(BaseTool):
+class AppScriptRunScriptTool(GoogleSheetsScriptBaseTool):
     """Tool for running Google Sheets App Script Run method."""
 
     name = "Google Sheets App Script Run method"
@@ -80,7 +81,7 @@ class AppScriptRunScriptTool(BaseTool):
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
-        return self.api_wrapper.run_script(scriptId, action_input)
+        return self.api_wrapper.run_script(scriptId, self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
         """Use the tool asynchronously."""

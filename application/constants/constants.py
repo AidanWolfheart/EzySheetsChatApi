@@ -15,7 +15,8 @@ SCOPES = ['https://www.googleapis.com/auth/drive.scripts',
           'https://www.googleapis.com/auth/script.processes',
           'https://www.googleapis.com/auth/drive',
           'https://www.googleapis.com/auth/script.scriptapp',
-          'https://www.googleapis.com/auth/script.external_request']
+          'https://www.googleapis.com/auth/script.external_request',
+          'https://www.googleapis.com/auth/script.deployments']
 
 
 CLIENT_SECRETS_FILE = os.path.join(dirname, '../../.env/client_secrets.json')

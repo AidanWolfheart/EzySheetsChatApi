@@ -1,13 +1,5 @@
 from __future__ import print_function
 
-import os.path
-from typing import Any
-
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 import json
 from langchain.tools import BaseTool
 
@@ -15,7 +7,8 @@ from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, A
 
 sample_spreadsheet_id = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
 
-scriptId = "1n3TQX2a-CgpcXnRnR07eBknXw2vKmJGLqTqbyWvZO0u-v3sVsRY71WV4"
+scriptId = "1Ws462FLVENvSLb5JyOwS0ehdWfembe8n1YDxkTC1W_PKiMsAm92CFiDk"
+deploymentId = "AKfycbxLdKTwSW2kTG8JEwqVT2Ju4EqSJDFDcJG9QOVj48pD03x-z5rPZq57fzzf_jijKn4K"
 
 class GoogleSheetsScriptBaseTool(BaseTool):
     def sanitize_json(self, input_json_string):
@@ -55,10 +48,14 @@ class AppScriptUpdateTool(GoogleSheetsScriptBaseTool):
     )
 
     api_wrapper: AppScriptToolWrapper
+    # scriptId_handler: ScriptIdHandler
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
         # print(f"Google Sheet tool, action input: {action_input}\n")
+
+        # scriptId = self.scriptId_handler.pass_scriptid()
+
         return self.api_wrapper.update_script(scriptId, self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
@@ -81,7 +78,7 @@ class AppScriptRunScriptTool(GoogleSheetsScriptBaseTool):
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
-        return self.api_wrapper.run_script(scriptId, self.sanitize_json(action_input))
+        return self.api_wrapper.run_script(deploymentId, self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
         """Use the tool asynchronously."""

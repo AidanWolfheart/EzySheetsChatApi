@@ -1,4 +1,4 @@
-from application.agent.load_tools import get_appscript_service
+from application.agent.load_tools import get_appscript_service, local_service
 from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, AppScriptToolWrapper
 
 batch_update_test_reqeust = {
@@ -110,13 +110,17 @@ test_reqeust_2 = {
 
 
 def init():
-    service = get_appscript_service()
+    service = local_service()
     return AppScriptToolWrapper(service=service)
 
 
+def call_deploy_script(tool):
+    scriptId = "1Ws462FLVENvSLb5JyOwS0ehdWfembe8n1YDxkTC1W_PKiMsAm92CFiDk"
+    tool.deploy_script(scriptId)
+
 def call_run_script(tool):
-    scriptId = "1rYaaiM5Ge1r_gMTIQ4i_p7t1Txln_Gq5_earazkbDNVH-JSBVl1RZLEF"
-    run_request = '{"function": "highlightCellsContainingS"}'
+    scriptId = "1Ws462FLVENvSLb5JyOwS0ehdWfembe8n1YDxkTC1W_PKiMsAm92CFiDk"
+    run_request = "createTable"
     tool.run_script(scriptId, run_request)
 
 
@@ -146,4 +150,5 @@ if __name__ == "__main__":
     # scriptId = "1Ca_cZBxopuL9irK-Y0iCdnO9fUPxJMcm14qmLiVxUK4RRdmvC0Ug1lhE"
     # script_tool = GoogleSheetsToolWrapper1(service=service)
     # script_tool.update_script(scriptId, request)
-    call_run_script(tool)
+    call_deploy_script(tool)
+    #call_run_script(tool)

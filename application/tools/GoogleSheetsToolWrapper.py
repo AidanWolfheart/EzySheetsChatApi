@@ -5,6 +5,7 @@ import time
 import traceback
 import enum
 from typing import Any
+from utcnow import utcnow
 
 import flask
 import google
@@ -75,10 +76,9 @@ class AppScriptToolWrapper(BaseModel):
     name = "Google Sheets App Script"
     description = "Useful for executing Google Sheets App Script Methods."
 
-    def create_script(self, request, spreadsheetId):
+    def create_script(self, request):
 
-        body = {'title': request.strip(),
-                'parentId': spreadsheetId
+        body = {'title': request.strip()
                 }
 
         try:
@@ -88,12 +88,32 @@ class AppScriptToolWrapper(BaseModel):
             response = None
         return response
 
-    def deployment_script(self, scriptId):
+    def deploy_script(self, scriptId):
+
+        request = {
+              "versionNumber": 3,
+              "manifestFileName": 'SAMPLE_MANIFEST',
+              "description": 'string'
+            }
 
         body = {
-            "versionNumber": 1,
-            "manifestFileName": SAMPLE_MANIFEST,
-            "description": 'string'
+            "versionNumber": 3,
+            "manifestFileName": 'SAMPLE_MANIFEST',
+            "description": 'string',
+            "deploymentConfig": {
+                "scriptId": scriptId,
+                "versionNumber": 1,
+                "manifestFileName": 'SAMPLE_MANIFEST',
+                "description": 'string'
+            },
+            "updateTime": utcnow.get(),
+            "entryPoints": [
+                {
+                    "executionApi": {
+                        "access": "ANYONE"
+                    },
+                }
+            ]
         }
 
         test_body = {
@@ -104,7 +124,7 @@ class AppScriptToolWrapper(BaseModel):
                   "manifestFileName": SAMPLE_MANIFEST,
                   "description": 'string'
               },
-              "updateTime": time.localtime(),
+              "updateTime": utcnow.get(),
               "entryPoints": [
                 {
                     "executionApi": {
@@ -115,19 +135,19 @@ class AppScriptToolWrapper(BaseModel):
             }
 
         try:
-            response = self.service.projects.deployments.create(scriptId=scriptId, body=body).execute()
+            response = self.service.projects().deployments().create(scriptId=scriptId, body=request).execute()
         except errors.HttpError as error:
             print(error.content)
             response = None
         return response
 
     def update_script(self, scriptId, request):
-        # print(f"---- request: {request}\n")
+        print(f"---- request: {request}\n")
         body = {
             'files': [{
-                'name': 'tool1',
+                'name': 'createTable',
                 'type': 'SERVER_JS',
-                'source': request.strip()
+                'source': request.strip(),
             }, {
                 'name': 'appsscript',
                 'type': 'JSON',
@@ -151,21 +171,22 @@ class AppScriptToolWrapper(BaseModel):
             result = "Update was unsuccessful"
         return result
 
-    def run_script(self, scriptId, request):
+    def run_script(self, deploymentId, request):
         print(f"---- request: {request}\n")
         body = {"function": request}
         print("Running script...")
-        print(f"=========== \n scriptId: {scriptId} \n body: {body} \n ===========")
+        print(f"=========== \n deploymentId: {deploymentId} \n body: {body} \n ===========")
         global count_run
         count_run += 1
         print(f"\n Run method was used: {count_run}")
         try:
-            response = self.service.scripts().run(scriptId=scriptId, body=body).execute()
+            response = self.service.scripts().run(scriptId=deploymentId, body=body).execute()
             result = "Successful run"
         except errors.HttpError as error:
             print(error.content)
+            response = None
             result = "Unsuccessful run"
-        return result
+        return response
 
 class GoogleSheetsToolWrapper(BaseModel):
     """Tool for executing Google Sheets API Methods."""

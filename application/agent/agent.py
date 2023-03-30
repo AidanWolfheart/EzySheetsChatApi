@@ -5,7 +5,6 @@ from application.agent.load_tools import load_tools
 from application.constants.constants import OPENAI_API_KEY
 from langchain.agents import ZeroShotAgent, Tool, AgentExecutor, ConversationalAgent
 from langchain.chains import LLMChain, SequentialChain
-from langchain.utilities import SerpAPIWrapper
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import (
     ChatPromptTemplate,

@@ -5,6 +5,7 @@ from google.auth.transport import requests
 
 from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES
 from application.handlers.message_handler import MessageHandler
+from application.handlers.scriptid_handler import ScriptIdHandler
 from flask import Blueprint, Response, request, make_response, jsonify
 import json
 import traceback
@@ -16,7 +17,7 @@ chat.url_prefix = '/chat'
 APPLICATION_JSON = 'application/json'
 
 message_handler = MessageHandler()
-
+#scriptId_handler = ScriptIdHandler()
 
 @chat.route('/')
 def index():
@@ -38,9 +39,11 @@ def conversation():
         reqeust_body = request.get_json()
         userid = reqeust_body.get('userid')
         message = reqeust_body.get('message')
+        scriptId = reqeust_body.get('scriptId')
 
-        print(f'userid: {userid}, msg={message}, body: {reqeust_body}')
+        print(f'userid: {userid}, msg={message}, body: {reqeust_body}, scriptId: {scriptId}')
         response_string = message_handler.handle_message(userid, message)
+        #scriptId_handler.get_scriptid(scriptId)
         return Response(json.dumps(response_string), mimetype=APPLICATION_JSON)
     except Exception:
         error = f'Encountered error: {traceback.format_exc()})'

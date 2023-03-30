@@ -5,7 +5,6 @@ from google.auth.transport import requests
 
 from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES
 from application.handlers.message_handler import MessageHandler
-from application.handlers.scriptid_handler import ScriptIdHandler
 from flask import Blueprint, Response, request, make_response, jsonify
 import json
 import traceback

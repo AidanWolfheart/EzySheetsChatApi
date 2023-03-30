@@ -115,13 +115,27 @@ def init():
 
 
 def call_deploy_script(tool):
-    scriptId = "1Ws462FLVENvSLb5JyOwS0ehdWfembe8n1YDxkTC1W_PKiMsAm92CFiDk"
+    scriptId = "1-OFU2Lpo4a3yQB5cGCZSeWcp-6jBuJhs2Ao7NlmqQ7_bJpq-Z6wzISBR"
     tool.deploy_script(scriptId)
 
 def call_run_script(tool):
     scriptId = "1Ws462FLVENvSLb5JyOwS0ehdWfembe8n1YDxkTC1W_PKiMsAm92CFiDk"
     run_request = "createTable"
     tool.run_script(scriptId, run_request)
+
+def call_update_script(tool):
+    scriptId = "1-OFU2Lpo4a3yQB5cGCZSeWcp-6jBuJhs2Ao7NlmqQ7_bJpq-Z6wzISBR"
+    body = {
+        'files': [{
+            'name': 'createTable',
+            'type': 'SERVER_JS',
+            'source': request.strip(),
+        }, {
+            'name': 'appsscript',
+            'type': 'JSON',
+            'source': SAMPLE_MANIFEST
+        }]
+    }
 
 
 if __name__ == "__main__":

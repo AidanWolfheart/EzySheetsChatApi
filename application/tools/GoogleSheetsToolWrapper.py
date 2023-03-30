@@ -91,8 +91,8 @@ class AppScriptToolWrapper(BaseModel):
     def deploy_script(self, scriptId):
 
         request = {
-              "versionNumber": 3,
-              "manifestFileName": 'SAMPLE_MANIFEST',
+              "versionNumber": 1,
+              "manifestFileName": 'appsscript',
               "description": 'string'
             }
 

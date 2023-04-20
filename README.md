@@ -5,6 +5,11 @@ This is a project that provides the API that allows you to chat with an AI
 - Put necessary contents in the `config.json` file
 - Put the necessary contents in the `client_secretes.json` file
 
+Those files go under .env folder in root of the project.
+
+config.json requires two keys: OPEN_API_KEY & WORKING_URL. Second should point either to http://localhost:4200/ or to 
+https://ezy.works/ when deployed.
+
 See [doc](https://docs.google.com/document/d/1isarquaUL6aNTF3gB_q_72UyjPkR91ig24gIOY16y1Q/edit) for additional info
 
 ## How start project

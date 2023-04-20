@@ -3,9 +3,9 @@ import google
 import google_auth_oauthlib
 from google.auth.transport import requests
 
-from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES
+from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES, WORKING_URL
 from application.handlers.message_handler import MessageHandler
-from flask import Blueprint, Response, request, make_response, jsonify
+from flask import Blueprint, Response, request, jsonify
 import json
 import traceback
 
@@ -58,10 +58,10 @@ def authorize():
     # for the OAuth 2.0 client, which you configured in the API Console. If this
     # value doesn't match an authorized URI, you will get a 'redirect_uri_mismatch'
     # error.
-    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True)
+    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True, _scheme='https')
 
     if 'state' in flask.session and 'credentials' in flask.session:
-        return jsonify({"url": "http://localhost:4200/"})
+        return jsonify({"url": WORKING_URL})
 
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
@@ -80,7 +80,7 @@ def authorize():
 
 @chat.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:4200')
+    response.headers.add('Access-Control-Allow-Origin', WORKING_URL)
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
@@ -98,7 +98,7 @@ def oauth2callback():
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
-    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True)
+    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True, _scheme='https')
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
     authorization_response = flask.request.url
@@ -112,7 +112,7 @@ def oauth2callback():
 
     flask.session.modified = True
 
-    response = flask.redirect("http://localhost:4200/")
+    response = flask.redirect(WORKING_URL)
     return response
 
 
@@ -125,6 +125,16 @@ def signed_in():
 
     return jsonify({"creds": credentials_exist})
 
+@chat.route('/send-active-script-id', methods=['POST'])
+def send_active_script_id(script_id):
+    flask.session['script_id'] = script_id
+
+@chat.route('/get-active-script-id', methods=['GET'])
+def get_active_script_id():
+    if 'script_id' in flask.session:
+        return flask.session['script_id']
+    else:
+        return ''
 
 @chat.route('/revoke', methods=['GET'])
 def revoke():

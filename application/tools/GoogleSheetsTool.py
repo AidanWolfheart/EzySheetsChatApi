@@ -3,6 +3,7 @@ from __future__ import print_function
 import os.path
 from typing import Any
 
+import flask
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -15,7 +16,8 @@ from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, A
 
 sample_spreadsheet_id = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
 
-scriptId = "1rYaaiM5Ge1r_gMTIQ4i_p7t1Txln_Gq5_earazkbDNVH-JSBVl1RZLEF"
+def get_session_script_id():
+    return flask.session['script_id'] if 'script_id' in flask.session else ''
 
 class GoogleSheetsScriptBaseTool(BaseTool):
     def sanitize_json(self, input_json_string):
@@ -58,7 +60,7 @@ class AppScriptUpdateTool(GoogleSheetsScriptBaseTool):
     def _run(self, action_input: str) -> str:
         "Use the tool"
         print(f"Google Sheet tool, action input: {action_input}\n")
-        return self.api_wrapper.update_script(scriptId, self.sanitize_json(action_input))
+        return self.api_wrapper.update_script(get_session_script_id(), self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
         """Use the tool asynchronously."""
@@ -80,7 +82,7 @@ class AppScriptRunScriptTool(BaseTool):
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
-        return self.api_wrapper.run_script(scriptId, action_input)
+        return self.api_wrapper.run_script(get_session_script_id(), action_input)
 
     async def _arun(self, input: str) -> str:
         """Use the tool asynchronously."""

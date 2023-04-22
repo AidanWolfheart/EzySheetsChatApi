@@ -1,4 +1,4 @@
-from application.agent.agent import Agent
+from application.agent.agent import Agent, MyAppScriptZeroShotAgent
 
 
 class AgentManager:
@@ -11,6 +11,6 @@ class AgentManager:
         return self.users_agent[userid]
 
     def create_agent(self, userid):
-        agent = Agent()
+        agent = MyAppScriptZeroShotAgent()
         self.users_agent[userid] = agent
         return agent

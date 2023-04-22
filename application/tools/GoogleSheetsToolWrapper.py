@@ -18,9 +18,10 @@ from pydantic import BaseModel
 from googleapiclient import errors
 from oauth2client import client
 from application.shared.helpers import credentials_to_dict
-
+import logging
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+logging.getLogger('gunicorn.error')
 
 create_request = {
     'properties': {
@@ -65,12 +66,12 @@ class AppScriptToolWrapper(BaseModel):
         try:
             response = self.service.projects().create(body=body).execute()
         except errors.HttpError as error:
-            print(error.content)
+            logging.error(error.content)
             response = None
         return response
 
     def update_script(self, scriptId, request):
-        print(f"---- request: {request}\n")
+        logging.info(f"---- request: {request}\n")
         body = {
             'files': [{
                 'name': 'tool1',
@@ -87,17 +88,17 @@ class AppScriptToolWrapper(BaseModel):
                             '''.strip()
             }]
         }
-        print("Updating script...")
-        print(f"=========== \n scriptId: {scriptId} \n body: {body} \n ===========")
+        logging.info("Updating script...")
+        logging.info(f"=========== \n scriptId: {scriptId} \n body: {body} \n ===========")
         try:
             response = self.service.projects().updateContent(
                 body=body,
                 scriptId=scriptId
             ).execute()
-            print(response)
+            logging.info(response)
             result = "Update was successful"
         except errors.HttpError as error:
-            print("Encountered erroring while executing update: " + error.content)
+            logging.error("Encountered erroring while executing update: " + error.content)
             result = "Update was unsuccessful"
         return result
 
@@ -105,7 +106,7 @@ class AppScriptToolWrapper(BaseModel):
         try:
             response = self.service.scripts().run(scriptId=scriptId, body=request).execute()
         except errors.HttpError as error:
-            print(error.content)
+            logging.error(error.content)
             response = None
         return response
 
@@ -119,26 +120,26 @@ class GoogleSheetsToolWrapper(BaseModel):
 
     def create(self, request):
         try:
-            print("Calling create with the following json: ")
-            print(request)
+            logging.info("Calling create with the following json: ")
+            logging.info(request)
 
             request = self.service.spreadsheets().create(body=request, fields='spreadsheetId')
             response = request.execute()
-            print(f"Spreadsheet ID: {(response.get('spreadsheetId'))}")
+            logging.info(f"Spreadsheet ID: {(response.get('spreadsheetId'))}")
         except HttpError as error:
-            print(f"An error occurred: {error}")
+            logging.error(f"An error occurred: {error}")
             response = None
         return response
 
     def batch_update(self, spreadsheet_id, request):
         try:
-            print("Calling batch_update with the following json: ")
-            print(request)
+            logging.info("Calling batch_update with the following json: ")
+            logging.info(request)
 
             request = self.service.spreadsheets().batchUpdate(spreadsheetId=spreadsheet_id, body=request)
             response = request.execute()
         except Exception as error:
-            print(f"An error occurred: {traceback.print_exc()}")
+            logging.error(f"An error occurred: {traceback.print_exc()}")
             response = None
         return response
 
@@ -147,19 +148,19 @@ class GoogleSheetsToolWrapper(BaseModel):
             request = self.service.spreadsheets().values().batchUpdate(spreadsheetId=spreadsheet_id, body=request)
             response = request.execute()
         except HttpError as error:
-            print(f"An error occurred: {error}")
+            logging.error(f"An error occurred: {error}")
             response = None
         return response
 
     def get(self, spreadsheetId, ranges):
         try:
-            print("Calling get with the following range: ")
-            print(ranges)
+            logging.info("Calling get with the following range: ")
+            logging.info(ranges)
 
             request = self.service.spreadsheets().get(spreadsheetId=spreadsheetId, ranges=ranges)
             response = request.execute()
         except HttpError as error:
-            print(f"An error occurred: {error}")
+            logging.error(f"An error occurred: {error}")
             response = None
         return response
 
@@ -168,7 +169,7 @@ class GoogleSheetsToolWrapper(BaseModel):
             request = self.service.spreasheets().batchClearByDataFilter(spreadsheetId=spreadsheetId, body=request)
             response = request.execute()
         except HttpError as error:
-            print(f"An error occurred: {error}")
+            logging.error(f"An error occurred: {error}")
             response = None
         return response
 

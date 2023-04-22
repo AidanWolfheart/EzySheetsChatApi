@@ -12,9 +12,12 @@ from googleapiclient.errors import HttpError
 import json
 from langchain.tools import BaseTool
 
+import logging
+
 from application.tools.GoogleSheetsToolWrapper import GoogleSheetsToolWrapper, AppScriptToolWrapper
 
 sample_spreadsheet_id = '1fckx6R1uHS0si04wT54U354gE_oUReZJLVTygG8-uzE'
+logging.getLogger('gunicorn.error')
 
 def get_session_script_id():
     return flask.session['script_id'] if 'script_id' in flask.session else ''
@@ -59,7 +62,7 @@ class AppScriptUpdateTool(GoogleSheetsScriptBaseTool):
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
-        print(f"Google Sheet tool, action input: {action_input}\n")
+        logging.info(f"Google Sheet tool, action input: {action_input}\n")
         return self.api_wrapper.update_script(get_session_script_id(), self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:

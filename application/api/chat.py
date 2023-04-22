@@ -1,4 +1,3 @@
-  GNU nano 6.2                                                                                      chat.py
 import flask
 import google
 import google_auth_oauthlib
@@ -9,6 +8,7 @@ from application.handlers.message_handler import MessageHandler
 from flask import Blueprint, Response, request, jsonify
 import json
 import traceback
+import logging
 
 from application.shared.helpers import credentials_to_dict
 
@@ -17,6 +17,7 @@ chat.url_prefix = '/chat'
 APPLICATION_JSON = 'application/json'
 
 message_handler = MessageHandler()
+logging.getLogger('gunicorn.error')
 
 
 @chat.route('/')
@@ -40,12 +41,12 @@ def conversation():
         userid = reqeust_body.get('userid')
         message = reqeust_body.get('message')
 
-        print(f'userid: {userid}, msg={message}, body: {reqeust_body}')
+        logging.info(f'userid: {userid}, msg={message}, body: {reqeust_body}')
         response_string = message_handler.handle_message(userid, message)
         return Response(json.dumps(response_string), mimetype=APPLICATION_JSON)
     except Exception:
         error = f'Encountered error: {traceback.format_exc()})'
-        print(error)
+        logging.error(error)
         return Response(json.dumps("Error has occured. Please try again."), mimetype=APPLICATION_JSON)
 
 
@@ -110,6 +111,7 @@ def oauth2callback():
     #              credentials in a persistent database instead.
     credentials = flow.credentials
     flask.session['credentials'] = credentials_to_dict(credentials)
+    flask.session['refresh_token'] = credentials.refresh_token
 
     flask.session.modified = True
 

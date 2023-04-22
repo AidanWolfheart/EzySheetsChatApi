@@ -1,3 +1,4 @@
+  GNU nano 6.2                                                                                      chat.py
 import flask
 import google
 import google_auth_oauthlib
@@ -125,16 +126,22 @@ def signed_in():
 
     return jsonify({"creds": credentials_exist})
 
-@chat.route('/send-active-script-id', methods=['POST'])
-def send_active_script_id(script_id):
+@chat.route('/set-active-script-id', methods=['POST'])
+def set_active_script_id():
+    script_id = request.get_json().get('script_id')
+
     flask.session['script_id'] = script_id
+    return Response(json.dumps("Set active script to "+script_id), mimetype=APPLICATION_JSON)
 
 @chat.route('/get-active-script-id', methods=['GET'])
 def get_active_script_id():
+    active_script_id = ''
+
     if 'script_id' in flask.session:
-        return flask.session['script_id']
-    else:
-        return ''
+        active_script_id = flask.session['script_id']
+
+    return jsonify({'scriptId':active_script_id})
+
 
 @chat.route('/revoke', methods=['GET'])
 def revoke():

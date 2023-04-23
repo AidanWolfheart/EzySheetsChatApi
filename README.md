@@ -7,8 +7,11 @@ This is a project that provides the API that allows you to chat with an AI
 
 Those files go under .env folder in root of the project.
 
-config.json requires two keys: OPEN_API_KEY & WORKING_URL. Second should point either to http://localhost:4200/ or to 
-https://ezy.works/ when deployed.
+config.json requires the following keys: 
+- `"OPEN_API_KEY"` - Enter your own Open Api Key
+- `"WORKING_URL"` - Either http://localhost:4200/ for DEV or to 
+https://ezy.works/ for PROD.
+- `"PROTOCOL"` - "http" for DEV or "https" for PROD
 
 See [doc](https://docs.google.com/document/d/1isarquaUL6aNTF3gB_q_72UyjPkR91ig24gIOY16y1Q/edit) for additional info
 

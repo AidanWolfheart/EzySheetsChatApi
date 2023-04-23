@@ -3,7 +3,7 @@ import google
 import google_auth_oauthlib
 from google.auth.transport import requests
 
-from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES, WORKING_URL
+from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES, WORKING_URL, PROTOCOL
 from application.handlers.message_handler import MessageHandler
 from flask import Blueprint, Response, request, jsonify
 import json
@@ -60,7 +60,7 @@ def authorize():
     # for the OAuth 2.0 client, which you configured in the API Console. If this
     # value doesn't match an authorized URI, you will get a 'redirect_uri_mismatch'
     # error.
-    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True, _scheme='https')
+    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True, _scheme=PROTOCOL)
 
     if 'state' in flask.session and 'credentials' in flask.session:
         return jsonify({"url": WORKING_URL})
@@ -100,7 +100,7 @@ def oauth2callback():
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes=SCOPES, state=state)
-    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True, _scheme='https')
+    flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True, _scheme=PROTOCOL)
 
     # Use the authorization server's response to fetch the OAuth 2.0 tokens.
     authorization_response = flask.request.url

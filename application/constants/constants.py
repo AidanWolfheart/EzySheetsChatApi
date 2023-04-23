@@ -9,6 +9,7 @@ data = json.load(f)
 
 OPENAI_API_KEY = data['OPENAI_API_KEY']
 WORKING_URL = data['WORKING_URL']
+PROTOCOL = data['PROTOCOL']
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/script.projects']
 

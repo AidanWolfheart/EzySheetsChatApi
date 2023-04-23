@@ -36,8 +36,8 @@ class MyAppScriptZeroShotAgent:
 
         suffix = """Begin, remember to use the provided tool when possible!
 
-
-    New input: {input}
+    
+    Question: {input}
     {agent_scratchpad}"""
 
         prompt = ZeroShotAgent.create_prompt(
@@ -47,11 +47,11 @@ class MyAppScriptZeroShotAgent:
             input_variables=["input", "agent_scratchpad"]
         )
 
-        llm_chain = LLMChain(llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0), prompt=prompt, verbose=True)
+        llm_chain = LLMChain(llm=ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0), prompt=prompt)
 
         tool_names = [tool.name for tool in tools]
 
-        agent = ZeroShotAgent(llm_chain=llm_chain, allowed_tools=tool_names)
+        agent = ZeroShotAgent(llm_chain=llm_chain, allowed_tools=tool_names, max_iterations=0)
 
         self.agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
 
@@ -74,7 +74,7 @@ class Agent:
 
     Assistant has access to the following tools:"""
 
-        suffix = """Begin, remember to use the provided tool when possible!
+        suffix = """Begin, remember to use the provided tool when possible.
 
 
     New input: {input}

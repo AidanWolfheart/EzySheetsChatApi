@@ -47,7 +47,7 @@ def conversation():
     except Exception:
         error = f'Encountered error: {traceback.format_exc()})'
         logging.error(error)
-        return Response(json.dumps("Error has occured. Please try again."), mimetype=APPLICATION_JSON)
+        return Response(json.dumps("Error has occurred. Please try again."), mimetype=APPLICATION_JSON)
 
 
 @chat.route('/authorize', methods=['GET'])

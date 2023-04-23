@@ -11,9 +11,14 @@ OPENAI_API_KEY = data['OPENAI_API_KEY']
 WORKING_URL = data['WORKING_URL']
 PROTOCOL = data['PROTOCOL']
 
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/script.projects']
+SCOPES = ['https://www.googleapis.com/auth/drive.scripts',
+          'https://www.googleapis.com/auth/spreadsheets',
+          'https://www.googleapis.com/auth/script.projects',
+          'https://www.googleapis.com/auth/script.processes',
+          'https://www.googleapis.com/auth/drive',
+          'https://www.googleapis.com/auth/script.scriptapp',
+          'https://www.googleapis.com/auth/script.external_request',
+          'https://www.googleapis.com/auth/script.deployments']
 
 CLIENT_SECRETS_FILE = os.path.join(dirname, '../../.env/client_secrets.json')
-
-TOKEN_FILE = os.path.join(dirname, './token.json')
-
+TOKEN_FILE = os.path.join(dirname, '../../.env/token.json')

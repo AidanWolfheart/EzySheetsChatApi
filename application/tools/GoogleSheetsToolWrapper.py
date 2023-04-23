@@ -1,8 +1,11 @@
 from __future__ import print_function
 
 import os.path
+import time
 import traceback
+import enum
 from typing import Any
+from utcnow import utcnow
 
 import flask
 import google
@@ -51,6 +54,21 @@ client_secrets_filename = os.path.join(dirname, '../agent/client_secrets.json')
 token_filename = os.path.join(dirname, '../../.env/token.json')
 
 
+count_update=0
+count_run=0
+
+SAMPLE_MANIFEST = '''
+{
+  "timeZone": "Asia/Almaty",
+  "exceptionLogging": "CLOUD"
+}
+'''.strip()
+
+
+class Enum(enum.Enum):
+    ANYONE = 4
+
+
 class AppScriptToolWrapper(BaseModel):
     """Tool Wrapper for executing App Script Code"""
 
@@ -70,26 +88,77 @@ class AppScriptToolWrapper(BaseModel):
             response = None
         return response
 
+    def deploy_script(self, scriptId):
+
+        request = {
+              "versionNumber": 1,
+              "manifestFileName": 'appsscript',
+              "description": 'string'
+            }
+
+        body = {
+            "versionNumber": 3,
+            "manifestFileName": 'SAMPLE_MANIFEST',
+            "description": 'string',
+            "deploymentConfig": {
+                "scriptId": scriptId,
+                "versionNumber": 1,
+                "manifestFileName": 'SAMPLE_MANIFEST',
+                "description": 'string'
+            },
+            "updateTime": utcnow.get(),
+            "entryPoints": [
+                {
+                    "executionApi": {
+                        "access": "ANYONE"
+                    },
+                }
+            ]
+        }
+
+        test_body = {
+              "deploymentId": 'string',
+              "deploymentConfig": {
+                  "scriptId": scriptId,
+                  "versionNumber": 1,
+                  "manifestFileName": SAMPLE_MANIFEST,
+                  "description": 'string'
+              },
+              "updateTime": utcnow.get(),
+              "entryPoints": [
+                {
+                    "executionApi": {
+                        "access": Enum.ANYONE
+                    },
+                }
+              ]
+            }
+
+        try:
+            response = self.service.projects().deployments().create(scriptId=scriptId, body=request).execute()
+        except errors.HttpError as error:
+            print(error.content)
+            response = None
+        return response
+
     def update_script(self, scriptId, request):
         logging.info(f"---- request: {request}\n")
         body = {
             'files': [{
-                'name': 'tool1',
+                'name': 'createTable',
                 'type': 'SERVER_JS',
-                'source': request.strip()
+                'source': request.strip(),
             }, {
                 'name': 'appsscript',
                 'type': 'JSON',
-                'source': '''
-                            {
-                            "timeZone": "Asia/Almaty",
-                            "exceptionLogging": "CLOUD"
-                            }
-                            '''.strip()
+                'source': SAMPLE_MANIFEST
             }]
         }
         logging.info("Updating script...")
         logging.info(f"=========== \n scriptId: {scriptId} \n body: {body} \n ===========")
+        global count_update
+        count_update += 1
+        print(f"\n Update method was used: {count_update}")
         try:
             response = self.service.projects().updateContent(
                 body=body,
@@ -102,12 +171,21 @@ class AppScriptToolWrapper(BaseModel):
             result = "Update was unsuccessful"
         return result
 
-    def run_script(self, scriptId, request):
+    def run_script(self, deploymentId, request):
+        print(f"---- request: {request}\n")
+        body = {"function": request}
+        print("Running script...")
+        print(f"=========== \n deploymentId: {deploymentId} \n body: {body} \n ===========")
+        global count_run
+        count_run += 1
+        print(f"\n Run method was used: {count_run}")
         try:
-            response = self.service.scripts().run(scriptId=scriptId, body=request).execute()
+            response = self.service.scripts().run(scriptId=deploymentId, body=body).execute()
+            result = "Successful run"
         except errors.HttpError as error:
             logging.error(error.content)
             response = None
+            result = "Unsuccessful run"
         return response
 
 class GoogleSheetsToolWrapper(BaseModel):

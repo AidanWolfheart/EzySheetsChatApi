@@ -66,7 +66,7 @@ def load_tools():
     service = get_appscript_service()
     #tools.append(AppScriptCreateScriptTool(api_wrapper=AppScriptToolWrapper(service=service)))
     tools.append(AppScriptUpdateTool(api_wrapper=AppScriptToolWrapper(service=service)))
-    tools.append(AppScriptRunScriptTool(api_wrapper=AppScriptToolWrapper(service=service)))
+    # tools.append(AppScriptRunScriptTool(api_wrapper=AppScriptToolWrapper(service=service)))
 
     # # Original Version
     # service = get_sheets_service()

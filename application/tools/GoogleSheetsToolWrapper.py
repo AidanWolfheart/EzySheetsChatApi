@@ -180,13 +180,13 @@ class AppScriptToolWrapper(BaseModel):
         count_run += 1
         print(f"\n Run method was used: {count_run}")
         try:
-            response = self.service.scripts().run(scriptId=deploymentId, body=body).execute()
+            # response = self.service.scripts().run(scriptId=deploymentId, body=body).execute()
             result = "Successful run"
         except errors.HttpError as error:
             logging.error(error.content)
             response = None
             result = "Unsuccessful run"
-        return response
+        return result
 
 class GoogleSheetsToolWrapper(BaseModel):
     """Tool for executing Google Sheets API Methods."""

@@ -137,7 +137,7 @@ class AppScriptToolWrapper(BaseModel):
         try:
             response = self.service.projects().deployments().create(scriptId=scriptId, body=request).execute()
         except errors.HttpError as error:
-            print(error.content)
+            logging.error(error.content)
             response = None
         return response
 
@@ -158,8 +158,12 @@ class AppScriptToolWrapper(BaseModel):
         logging.info(f"=========== \n scriptId: {scriptId} \n body: {body} \n ===========")
         global count_update
         count_update += 1
-        print(f"\n Update method was used: {count_update}")
+
+        logging.info(f"\n Update method was used: {count_update}")
         try:
+            if not self.service._http.credentials.refresh_token and 'refresh_token' in flask.session:
+                self.service._http.credentials.refresh_token = flask.session['refresh_token']
+
             response = self.service.projects().updateContent(
                 body=body,
                 scriptId=scriptId
@@ -172,13 +176,13 @@ class AppScriptToolWrapper(BaseModel):
         return result
 
     def run_script(self, deploymentId, request):
-        print(f"---- request: {request}\n")
+        logging.info(f"---- request: {request}\n")
         body = {"function": request}
-        print("Running script...")
-        print(f"=========== \n deploymentId: {deploymentId} \n body: {body} \n ===========")
+        logging.info("Running script...")
+        logging.info(f"=========== \n deploymentId: {deploymentId} \n body: {body} \n ===========")
         global count_run
         count_run += 1
-        print(f"\n Run method was used: {count_run}")
+        logging.info(f"\n Run method was used: {count_run}")
         try:
             # response = self.service.scripts().run(scriptId=deploymentId, body=body).execute()
             result = "Successful run"

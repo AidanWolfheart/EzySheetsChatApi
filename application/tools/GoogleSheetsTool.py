@@ -79,7 +79,7 @@ class AppScriptRunScriptTool(GoogleSheetsScriptBaseTool):
 
     def _run(self, action_input: str) -> str:
         "Use the tool"
-        return self.api_wrapper.run_script(deploymentId, self.sanitize_json(action_input))
+        return self.api_wrapper.run_script(get_session_script_id(), self.sanitize_json(action_input))
 
     async def _arun(self, input: str) -> str:
         """Use the tool asynchronously."""

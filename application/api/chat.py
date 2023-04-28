@@ -1,7 +1,7 @@
 import flask
 import google
 import google_auth_oauthlib
-from google.auth.transport import requests
+from google.auth.transport import requests, Request
 
 from application.constants.constants import CLIENT_SECRETS_FILE, SCOPES, WORKING_URL, PROTOCOL
 from application.handlers.message_handler import MessageHandler
@@ -30,13 +30,16 @@ def send_auth():
     google_auth = request.get_json()
     return Response(json.dumps(google_auth), mimetype=APPLICATION_JSON)
 
+def credentials_expire_check():
+    if 'credentials' in flask.session and flask.session['credentials'].expired or 'credentials' not in flask.session:
+        return True
 
 @chat.route('/conversation', methods=['POST'])
 def conversation():
-    try:
-        if 'credentials' not in flask.session:
-            return flask.redirect('authorize')
+    if credentials_expire_check():
+        return "Credentials expired", 400
 
+    try:
         reqeust_body = request.get_json()
         userid = reqeust_body.get('userid')
         message = reqeust_body.get('message')
@@ -62,15 +65,33 @@ def authorize():
     # error.
     flow.redirect_uri = flask.url_for('chat.oauth2callback', _external=True, _scheme=PROTOCOL)
 
-    if 'state' in flask.session and 'credentials' in flask.session:
+    if 'state' in flask.session and not credentials_expire_check():
         return jsonify({"url": WORKING_URL})
 
+    if 'credentials' in flask.session:
+        request = google.auth.transport.requests.Request()
+        creds = flask.session['credentials']
+        creds.refresh(request)
+
+    # TODO cleaner code
+    # two flows - first normal without forcing approval
+    # second forces approval to get refresh_token back
+    # if missing in session
     authorization_url, state = flow.authorization_url(
         # Enable offline access so that you can refresh an access token without
         # re-prompting the user for permission. Recommended for web server apps.
         access_type='offline',
         # Enable incremental authorization. Recommended as a best practice.
         include_granted_scopes='true')
+
+    if 'refresh_token' not in flask.session:
+        authorization_url, state = flow.authorization_url(
+            # Enable offline access so that you can refresh an access token without
+            # re-prompting the user for permission. Recommended for web server apps.
+            access_type='offline',
+            # Enable incremental authorization. Recommended as a best practice.
+            include_granted_scopes='true',
+            approval_prompt='force')
 
     # Store the state so the callback can verify the auth server response.
     flask.session['state'] = state
@@ -110,8 +131,10 @@ def oauth2callback():
     # ACTION ITEM: In a production app, you likely want to save these
     #              credentials in a persistent database instead.
     credentials = flow.credentials
-    flask.session['credentials'] = credentials_to_dict(credentials)
-    flask.session['refresh_token'] = credentials.refresh_token
+    flask.session['credentials'] = credentials
+
+    if credentials.refresh_token:
+        flask.session['refresh_token'] = credentials.refresh_token
 
     flask.session.modified = True
 
@@ -125,6 +148,9 @@ def signed_in():
 
     if 'credentials' in flask.session:
         credentials_exist = True
+
+    if credentials_expire_check():
+        credentials_exist = False
 
     return jsonify({"creds": credentials_exist})
 

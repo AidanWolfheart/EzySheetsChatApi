@@ -42,9 +42,9 @@ def get_local_cred():
             token.write(creds.to_json())
     return creds
 def get_oauth_cred():
-    creds = google.oauth2.credentials.Credentials(
-        **flask.session['credentials'])
-    flask.session['credentials'] = credentials_to_dict(creds)
+    creds = flask.session['credentials']
+
+    #flask.session['credentials'] = credentials_to_dict(creds)
 
     if creds.refresh_token is 'None' or '' and 'refresh_token' in flask.session:
         creds.refresh_token = flask.session['refresh_token']
